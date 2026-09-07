@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>عيد ميلاد سعيد يا خالو</title>
+    <!-- خطوط فخمة من جوجل -->
+    <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* شاشة البداية */
+        #start-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #2a0845 0%, #170324 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease-out;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            border: none;
+            padding: 15px 45px;
+            font-size: 2.2rem;
+            font-family: 'Aref Ruqaa', serif;
+            color: #3b0000;
+            border-radius: 50px;
+            box-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00;
+            cursor: pointer;
+            animation: pulse-btn 1.2s infinite alternate;
+            transition: transform 0.2s;
+        }
+
+        .start-btn:active {
+            transform: scale(0.9); /* حركة عند الضغط */
+        }
+
+        @keyframes pulse-btn {
+            0% { transform: scale(1); box-shadow: 0 0 15px #ffd700; }
+            100% { transform: scale(1.1); box-shadow: 0 0 35px #ffd700, 0 0 60px #ff8c00; }
+        }
+
+        /* حاوية القصص مع الخلفية الاحتفالية المبهجة */
+        .story-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            /* خلفية متدرجة متحركة تعطي بهجة */
+            background: linear-gradient(-45deg, #4b1049, #9e1d3e, #6a1b9a, #f9a826);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-in-out;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* الجسيمات المضيئة (البهجة) */
+        .fireflies {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            list-style: none;
+            pointer-events: none;
+        }
+
+        .fireflies li {
+            position: absolute;
+            display: block;
+            background: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 1);
+            border-radius: 50%;
+            bottom: -50px;
+            animation: floatUp 10s linear infinite;
+        }
+
+        .fireflies li:nth-child(1) { left: 10%; width: 15px; height: 15px; animation-delay: 0s; }
+        .fireflies li:nth-child(2) { left: 30%; width: 10px; height: 10px; animation-delay: 2s; animation-duration: 12s; }
+        .fireflies li:nth-child(3) { left: 60%; width: 20px; height: 20px; animation-delay: 4s; }
+        .fireflies li:nth-child(4) { left: 80%; width: 12px; height: 12px; animation-delay: 1s; animation-duration: 15s; }
+        .fireflies li:nth-child(5) { left: 45%; width: 25px; height: 25px; animation-delay: 6s; }
+        .fireflies li:nth-child(6) { left: 90%; width: 10px; height: 10px; animation-delay: 3s; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+        }
+
+        /* شريط التقدم */
+        .progress-bars {
+            position: absolute;
+            top: 15px;
+            left: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 100;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #ffd700;
+            box-shadow: 0 0 10px #ffd700;
+        }
+
+        /* أنيميشن التنقل بين الصفحات */
+        .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(60px) scale(0.9);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 1.2, 0.5, 1);
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0) scale(1);
+            z-index: 10;
+        }
+
+        /* أزرار التنقل المخفية */
+        .controls {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            z-index: 50;
+        }
+        .control-left, .control-right { flex: 1; height: 100%; cursor: pointer; }
+
+        /* تنسيق كلام الصفحة الأولى */
+        .first-slide-text {
+            font-size: 2.2rem;
+            line-height: 1.8;
+            font-family: 'Aref Ruqaa', serif;
+            background: linear-gradient(to bottom, #ffffff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+            animation: floatText 3s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        @keyframes floatText {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* تنسيق العداد */
+        .counter-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .number {
+            font-size: 9rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ffffff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8));
+            margin-bottom: 20px;
+            animation: pulse-number 0.1s infinite alternate paused;
+        }
+        .number.running { animation-play-state: running; }
+        @keyframes pulse-number { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+
+        .message-after-counter {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 15px #ff007f, 0 0 30px #ff007f;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .message-after-counter.show { opacity: 1; transform: scale(1); }
+
+        /* ======== الصفحة الثالثة ======== */
+        #slide-2 {
+            justify-content: flex-start;
+            padding-top: 80px;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .slide-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('uncle-image.jpg'); 
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+            transform: scale(1.3);
+            filter: blur(15px) brightness(0.3);
+            transition: transform 1.5s ease-out, filter 1.5s ease-out;
+        }
+
+        .slide-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.7) 100%);
+            z-index: -1;
+        }
+
+        #slide-2.active .slide-bg {
+            filter: blur(0px) brightness(0.9);
+            animation: kenBurns 15s ease-out forwards;
+        }
+
+        @keyframes kenBurns {
+            0% { transform: scale(1.1); }
+            100% { transform: scale(1.3); }
+        }
+
+        .text-wrapper {
+            opacity: 0;
+            transform: translateY(-40px);
+            transition: all 1s cubic-bezier(0.2, 1, 0.3, 1) 0.8s;
+        }
+
+        #slide-2.active .text-wrapper {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fancy-header {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 3rem;
+            color: #ffd700;
+            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000, 0 0 50px #ffaa00;
+            animation: pulse 2s infinite alternate;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ملفات الصوت (مخفية) -->
+    <audio id="sfx-start" src="start.mp3" preload="auto"></audio>
+    <audio id="sfx-whoosh" src="whoosh.mp3" preload="auto"></audio>
+    <audio id="sfx-counter" src="counter.mp3" preload="auto"></audio>
+    <audio id="sfx-party" src="party.mp3" preload="auto"></audio>
+    <audio id="song-bg" src="song.mp3" preload="auto"></audio>
+
+    <!-- شاشة البداية -->
+    <div id="start-screen">
+        <button class="start-btn" onclick="startStory()">ابدأ الاحتفال</button>
+    </div>
+
+    <!-- حاوية القصة -->
+    <div class="story-container" id="story-container">
+        
+        <!-- جسيمات الأضواء المبهجة -->
+        <ul class="fireflies">
+            <li></li><li></li><li></li><li></li><li></li><li></li>
+        </ul>
+
+        <!-- شريط التقدم -->
+        <div class="progress-bars">
+            <div class="progress-bar"><div class="progress-fill" id="fill-0"></div></div>
+            <div class="progress-bar"><div class="progress-fill" id="fill-1"></div></div>
+            <div class="progress-bar"><div class="progress-fill" id="fill-2"></div></div>
+        </div>
+
+        <!-- الصفحة الأولى: الرسالة -->
+        <div class="slide" id="slide-0">
+            <div class="first-slide-text">
+                كل سنة وانت طيب يا خالو<br><br>
+                يا احسن خال واخ وصاحب في الدنيا<br><br>
+                ربنا يبارك لك ويرزقك يا حبيبي ❤️
+            </div>
+        </div>
+
+        <!-- الصفحة الثانية: العداد -->
+        <div class="slide" id="slide-1">
+            <div class="counter-container">
+                <div class="number" id="age-counter">0</div>
+                <div class="message-after-counter" id="birthday-msg">
+                    كل سنة وانت طيب يا خالو عبقال ما تشوف عيال عيالك 🎉
+                </div>
+            </div>
+        </div>
+
+        <!-- الصفحة الثالثة: الصورة والأغنية -->
+        <div class="slide" id="slide-2">
+            <div class="slide-bg"></div>
+            <div class="slide-overlay"></div>
+            
+            <div class="text-wrapper">
+                <h1 class="fancy-header">كل سنة وأنت طيب يا حبيبي</h1>
+            </div>
+        </div>
+
+        <!-- أزرار التنقل -->
+        <div class="controls">
+            <div class="control-right" onclick="prevSlide()"></div>
+            <div class="control-left" onclick="nextSlide()"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 3;
+        const slideDuration = 8000;
+        let progressInterval;
+        let startTime;
+
+        // تعريف الصوتيات
+        const soundStart = document.getElementById('sfx-start');
+        const soundWhoosh = document.getElementById('sfx-whoosh');
+        const soundCounter = document.getElementById('sfx-counter');
+        const soundParty = document.getElementById('sfx-party');
+        const songBg = document.getElementById('song-bg');
+
+        function playSound(audioElement) {
+            if(audioElement) {
+                audioElement.currentTime = 0;
+                audioElement.play().catch(e => console.log("الصوت قيد الانتظار"));
+            }
+        }
+
+        function startStory() {
+            playSound(soundStart); // تشغيل صوت البداية الساحر
+            
+            document.getElementById('start-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-screen').style.display = 'none';
+                
+                const story = document.getElementById('story-container');
+                story.style.visibility = 'visible';
+                story.style.opacity = '1';
+                
+                setTimeout(() => {
+                    playSound(soundWhoosh);
+                    updateSlide();
+                }, 300); // تأخير بسيط ليدخل بجمال
+            }, 800);
+        }
+
+        function startProgress(slideIndex) {
+            clearInterval(progressInterval);
+            const fill = document.getElementById(`fill-${slideIndex}`);
+            fill.style.width = '0%';
+            
+            startTime = Date.now();
+            progressInterval = setInterval(() => {
+                const elapsedTime = Date.now() - startTime;
+                const percentage = (elapsedTime / slideDuration) * 100;
+                
+                if (percentage >= 100) {
+                    fill.style.width = '100%';
+                    clearInterval(progressInterval);
+                    nextSlide();
+                } else {
+                    fill.style.width = `${percentage}%`;
+                }
+            }, 50);
+        }
+
+        function resetProgress() {
+            for (let i = 0; i < totalSlides; i++) {
+                const fill = document.getElementById(`fill-${i}`);
+                if (i < currentSlide) {
+                    fill.style.width = '100%';
+                } else {
+                    fill.style.width = '0%';
+                }
+            }
+        }
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            document.getElementById(`slide-${currentSlide}`).classList.add('active');
+            
+            resetProgress();
+
+            // الأغنية للصفحة الثالثة فقط
+            if (currentSlide === 2) {
+                if(songBg) songBg.play().catch(e => console.log("خطأ تشغيل الأغنية"));
+            } else {
+                if(songBg) {
+                    songBg.pause();
+                    songBg.currentTime = 0;
+                }
+            }
+            
+            if (currentSlide === 1) {
+                runCounter();
+                clearInterval(progressInterval); 
+            } else {
+                startProgress(currentSlide);
+                document.getElementById('age-counter').innerText = '0';
+                document.getElementById('birthday-msg').classList.remove('show');
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                playSound(soundWhoosh); 
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                playSound(soundWhoosh); 
+                updateSlide();
+            }
+        }
+
+        function runCounter() {
+            let count = 0;
+            const target = 38;
+            const counterElement = document.getElementById('age-counter');
+            const msgElement = document.getElementById('birthday-msg');
+            
+            counterElement.classList.add('running');
+            playSound(soundCounter); 
+            
+            function updateCounter() {
+                if (count < target) {
+                    count++;
+                    counterElement.innerText = count;
+                    let speed = count > 30 ? 150 : 60; 
+                    setTimeout(updateCounter, speed);
+                } else {
+                    counterElement.classList.remove('running');
+                    if(soundCounter) soundCounter.pause(); 
+                    playSound(soundParty); 
+                    fireConfetti();
+                    msgElement.classList.add('show');
+                    
+                    setTimeout(() => {
+                        nextSlide();
+                    }, 5000);
+                }
+            }
+            updateCounter();
+        }
+
+        function fireConfetti() {
+            const duration = 4000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({ particleCount: 6, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#ff007f', '#7928ca', '#00f3ff', '#ffd700', '#ffffff'] });
+                confetti({ particleCount: 6, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#ff007f', '#7928ca', '#00f3ff', '#ffd700', '#ffffff'] });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    </script>
+</body>
+</html>
